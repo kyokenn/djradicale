@@ -37,8 +37,6 @@ INSTALLED_APPS = (
     'djradicale',
 )
 
-
-```python
 DJRADICALE_CONFIG = {
     'server': {
         'base_prefix': '/pim/',
