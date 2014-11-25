@@ -15,9 +15,28 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import json
+import re
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
+
+
+class DBCollectionQuerySet(models.query.QuerySet):
+    def filter_by_user(self, user, permission='rw'):
+        def is_valid(right):
+            return (
+                right['permission'] == permission and
+                re.match(right['user'], user.username))
+
+        collections = map(
+            lambda x: x['collection'],
+            filter(is_valid, settings.DJRADICALE_RIGHTS.values()))
+        q = Q()
+        for collection in collections:
+            q |= Q(path__regex=collection % {'login': user.username})
+        return self.filter(q)
 
 
 class DBCollection(models.Model):
@@ -25,11 +44,12 @@ class DBCollection(models.Model):
     Table of collections.
     '''
 
+    objects = DBCollectionQuerySet.as_manager()
     path = models.TextField('Path', unique=True)
     parent_path = models.TextField('Parent Path')
 
     def get_absolute_url(self):
-        return reverse('djradicale', kwargs={'url': self.path})
+        return reverse('djradicale:application', kwargs={'url': self.path})
 
     @property
     def last_modified(self):
@@ -67,7 +87,7 @@ class DBItem(models.Model):
     timestamp = models.DateTimeField('Timestamp', auto_now=True)
 
     def get_absolute_url(self):
-        return reverse('djradicale', kwargs={
+        return reverse('djradicale:application', kwargs={
             'url': '%s/%s' % (self.collection.path, self.name),
         })
 
@@ -76,6 +96,16 @@ class DBItem(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def _get_field(self, field):
+        lines = filter(
+            lambda x: x.startswith(field + ':'), self.text.split('\n'))
+        if lines:
+            return next(lines).lstrip(field + ':')
+
+    @property
+    def fn(self):
+        return self._get_field('FN')
 
     @property
     def path(self):

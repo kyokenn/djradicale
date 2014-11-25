@@ -18,5 +18,5 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
     'djradicale.views',
-    url(r'^(?P<url>.*)$', 'application', name='djradicale'),
+    url(r'^(?P<url>.*)$', 'application', name='application'),
 )

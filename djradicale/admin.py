@@ -57,7 +57,7 @@ class DBCollectionAdmin(admin.ModelAdmin):
 class DBItemAdmin(admin.ModelAdmin):
     form = DBItemForm
     fields = 'collection', 'name', 'text', 'timestamp'
-    list_display = 'name', 'collection', 'timestamp'
+    list_display = 'name', 'fn', 'collection', 'timestamp'
     list_filter = 'collection',
     readonly_fields = 'timestamp',
 

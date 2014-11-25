@@ -82,7 +82,7 @@ class WellKnownApplicationView(ApplicationView):
                     else:
                         url = '%s/calendar.ics/' % user
                     request.META['PATH_INFO'] = reverse(
-                        'djradicale:djradicale', kwargs={'url': url})
+                        'djradicale:application', kwargs={'url': url})
         return super().dispatch(request, *args, **kwargs)
 
 wellknown = WellKnownApplicationView.as_view()
