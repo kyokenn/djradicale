@@ -22,13 +22,13 @@ Requirements
 ------------
 
 * Python >= 3.0
-* Django >= 1.6
+* Django >= 1.7
 
 
 Installation
 ------------
 
-* Add djradicale to your project. (no setup.py atm).
+* pip install djradicale
 * Modify your project's settings.py:
 
 ```python
