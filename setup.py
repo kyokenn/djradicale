@@ -11,7 +11,7 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.0.1',
+    'version': '0.0.2',
     'author': 'Okami',
     'author_email': 'okami@fuzetsu.info',
     'description': (
@@ -21,7 +21,13 @@ data = {
     'license': 'GPLv3',
     'keywords': 'django radicale carddav caldav',
     'url': 'https://github.com/okami-1/djradicale',
-    'packages': ['djradicale'],
+    'packages': [
+        'djradicale',
+        'djradicale.auth',
+        'djradicale.rights',
+        'djradicale.storage',
+        'djradicale.tests',
+    ],
     'long_description': '',
     'classifiers': [
         'Development Status :: 3 - Alpha',
