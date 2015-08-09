@@ -1,13 +1,13 @@
-djradicale
+DjRadicale
 ==========
 
-Radicale is a free and open-source CalDAV and CardDAV server.
+[Radicale](http://radicale.org/) is a free and open-source CalDAV and CardDAV server.
 
 DjRadicale is an Django Application for integration Radicale with a Django.
 
 
 Features
---------
+========
 
 With all features that Radicale have you will also get:
 
@@ -19,22 +19,30 @@ With all features that Radicale have you will also get:
 
 
 Requirements
-------------
+============
 
 * Python >= 3.0
 * Django >= 1.7
 
 
 Installation
-------------
+============
 
-* pip install djradicale
-* Modify your project's settings.py:
+Install using PIP
+-----------------
+
+```
+$ pip install djradicale
+```
+
+Modify your settings.py
+-----------------------
 
 ```python
 INSTALLED_APPS = (
     ...
     'djradicale',
+    ...
 )
 
 DJRADICALE_CONFIG = {
@@ -78,7 +86,8 @@ DJRADICALE_RIGHTS = {
 }
 ```
 
-* Modify you project's urls.py:
+Modify you urls.py
+------------------
 
 ```python
 urlpatterns = [
@@ -89,10 +98,15 @@ urlpatterns = [
 ]
 ```
 
-* Choose one of those implementations for "well-known" urls handling:
+well-known urls configuration
+=============================
 
-0. External DjRadicale implementation. Add this to your urls'py:
+You need to choose an implementation for handling of the "well-known" urls
 
+External DjRadicale implementation
+----------------------------------
+
+Add this to your urls'py:
 ```python
 from djradicale.views import WellKnownView
 
@@ -104,7 +118,11 @@ urlpatterns = [
 ]
 ```
 
-0. Internal Radicale implementation (some clients does not work with it). Add this to your urls'py:
+Internal Radicale implementation
+--------------------------------
+
+Some clients does not work with it.
+Add this to your urls'py:
 
 ```python
 from djradicale.views import DjRadicaleView
