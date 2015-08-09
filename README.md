@@ -89,9 +89,9 @@ urlpatterns = [
 ]
 ```
 
-* Choose one from those implementations for handling of "well-known" urls:
+* Choose one of those implementations for "well-known" urls handling:
 
-1. External DjRadicale implementation. Add this to your urls'py:
+0. External DjRadicale implementation. Add this to your urls'py:
 
 ```python
 from djradicale.views import WellKnownView
@@ -104,7 +104,7 @@ urlpatterns = [
 ]
 ```
 
-2. Internal Radicale implementation (some clients does not work with it). Add this to your urls'py:
+0. Internal Radicale implementation (some clients does not work with it). Add this to your urls'py:
 
 ```python
 from djradicale.views import DjRadicaleView
