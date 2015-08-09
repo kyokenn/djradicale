@@ -35,6 +35,9 @@ Install using PIP
 $ pip install djradicale
 ```
 
+Configuration
+=============
+
 Modify your settings.py
 -----------------------
 
