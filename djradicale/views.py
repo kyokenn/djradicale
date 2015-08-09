@@ -35,7 +35,7 @@ class ApplicationResponse(HttpResponse):
             self[k] = v
 
 
-class ApplicationView(Application, View):
+class DjRadicaleView(Application, View):
     http_method_names = [
         'delete',
         'get',
@@ -51,7 +51,7 @@ class ApplicationView(Application, View):
     ]
 
     def __init__(self, **kwargs):
-        super(ApplicationView, self).__init__()
+        super(DjRadicaleView, self).__init__()
         super(View, self).__init__(**kwargs)
 
     @method_decorator(csrf_exempt)
@@ -64,10 +64,8 @@ class ApplicationView(Application, View):
             response.write(answer[0])
         return response
 
-application = ApplicationView.as_view()
 
-
-class WellKnownApplicationView(ApplicationView):
+class WellKnownView(DjRadicaleView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         # do not authentificate yet, just get the username
@@ -84,5 +82,3 @@ class WellKnownApplicationView(ApplicationView):
                     request.META['PATH_INFO'] = reverse(
                         'djradicale:application', kwargs={'url': url})
         return super().dispatch(request, *args, **kwargs)
-
-wellknown = WellKnownApplicationView.as_view()

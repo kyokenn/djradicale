@@ -95,7 +95,7 @@ LOGGING = {
     'loggers': {
         'djradicale': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'propagate': True,
         },
     }
@@ -122,12 +122,21 @@ DJRADICALE_CONFIG = {
         'type': 'custom',
         'custom_handler': 'djradicale.storage.django',
     },
+    'well-known': {
+        'carddav': '/pim/%(user)s/addressbook.vcf',
+        'caldav': '/pim/%(user)s/calendar.ics',
+    },
 }
 
 DJRADICALE_RIGHTS = {
     'rw': {
         'user': '.+',
         'collection': '^%(login)s/[a-z0-9\.\-_]+\.(vcf|ics)$',
+        'permission': 'rw',
+    },
+    'rw-root': {
+        'user': '.+',
+        'collection': '^%(login)s$',
         'permission': 'rw',
     },
 }

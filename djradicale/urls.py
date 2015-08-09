@@ -14,9 +14,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-urlpatterns = patterns(
-    'djradicale.views',
-    url(r'^(?P<url>.*)$', 'application', name='application'),
-)
+from .views import DjRadicaleView
+
+
+urlpatterns = [
+    url(r'^(?P<url>.*)$', DjRadicaleView.as_view(), name='application'),
+]

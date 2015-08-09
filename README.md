@@ -58,6 +58,10 @@ DJRADICALE_CONFIG = {
         'type': 'custom',
         'custom_handler': 'djradicale.storage.django',
     },
+    'well-known': {
+        'carddav': '/pim/%(user)s/addressbook.vcf',
+        'caldav': '/pim/%(user)s/calendar.ics',
+    },
 }
 
 DJRADICALE_RIGHTS = {
@@ -66,16 +70,49 @@ DJRADICALE_RIGHTS = {
         'collection': '^%(login)s/[a-z0-9\.\-_]+\.(vcf|ics)$',
         'permission': 'rw',
     },
+    'rw-root': {
+        'user': '.+',
+        'collection': '^%(login)s$',
+        'permission': 'rw',
+    },
 }
 ```
 
 * Modify you project's urls.py:
 
 ```python
-urlpatterns = patterns(
+urlpatterns = [
     ...
     url(r'^' + settings.DJRADICALE_CONFIG['server']['base_prefix'].lstrip('/'),
         include('djradicale.urls', namespace='djradicale')),
+    ...
+]
+```
+
+* Choose one from those implementations for handling of "well-known" urls:
+
+1. External DjRadicale implementation. Add this to your urls'py:
+
+```python
+from djradicale.views import WellKnownView
+
+urlpatterns = [
+    ...
     url(r'^\.well-known/(?P<type>(caldav|carddav))$',
-        'djradicale.views.wellknown', name='djradicale_well-known'),
+        WellKnownView.as_view(), name='djradicale_well-known'),
+    ...
+]
+```
+
+2. Internal Radicale implementation (some clients does not work with it). Add this to your urls'py:
+
+```python
+from djradicale.views import DjRadicaleView
+
+urlpatterns = [
+    ...
+    url(r'^\.well-known/(?P<type>(caldav|carddav))$',
+        DjRadicaleView.as_view(), name='djradicale_well-known'),
+    ...
+]
 ```
