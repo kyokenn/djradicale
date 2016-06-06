@@ -11,7 +11,7 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.0.5',
+    'version': '0.0.6',
     'author': 'Okami',
     'author_email': 'okami@fuzetsu.info',
     'description': (
@@ -24,6 +24,7 @@ data = {
     'packages': [
         'djradicale',
         'djradicale.auth',
+        'djradicale.migrations',
         'djradicale.rights',
         'djradicale.storage',
         'djradicale.tests',
