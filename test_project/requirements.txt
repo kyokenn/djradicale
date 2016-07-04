@@ -1,1 +1,2 @@
-Radicale==0.9
+Django==1.9.7
+Radicale==1.1.1

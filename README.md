@@ -23,6 +23,7 @@ Requirements
 
 * Python >= 3.0
 * Django >= 1.7
+* Radicale >= 1.1.1
 
 
 Installation
@@ -125,8 +126,8 @@ Internal Radicale implementation
 --------------------------------
 
 Some clients does not work with it.
-Add this to your urls'py:
 
+Add this to your urls'py:
 ```python
 from djradicale.views import DjRadicaleView
 

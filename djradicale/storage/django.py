@@ -22,6 +22,7 @@ from radicale import ical
 
 from ..models import DBCollection, DBItem, DBProperties
 
+
 class Collection(ical.Collection):
     @property
     def headers(self):
@@ -32,8 +33,12 @@ class Collection(ical.Collection):
     def write(self, headers=None, items=None):
         headers = headers or self.headers
         items = items if items is not None else self.items
-        timezones = list(set(i for i in items if isinstance(i, ical.Timezone)))
-        components = [i for i in items if isinstance(i, ical.Component)]
+
+        timezones = list(set(filter(
+            lambda x: isinstance(x, ical.Timezone), items.values())))
+        components = list(filter(
+            lambda x: isinstance(x, ical.Component), items.values()))
+
         for component in components:
             text = ical.serialize(self.tag, headers, [component] + timezones)
             collection, created = DBCollection.objects.get_or_create(
@@ -55,11 +60,11 @@ class Collection(ical.Collection):
     def text(self):
         components = (
             ical.Timezone, ical.Event, ical.Todo, ical.Journal, ical.Card)
-        items = set()
+        items = {}
         for item in DBItem.objects.filter(collection__path=self.path):
             items.update(self._parse(item.text, components))
         return ical.serialize(
-            self.tag, self.headers, sorted(items, key=lambda x: x.name))
+            self.tag, self.headers, items.values())
 
     @classmethod
     def children(cls, path):

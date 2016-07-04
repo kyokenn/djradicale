@@ -206,7 +206,6 @@ END:VCARD''',
     <href>%(path)stest.vcf</href>
     <propstat>
       <prop>
-        <displayname />
         <getetag>"2872777bafe841d06a74715130d904e0"</getetag>
         <CR:address-data>BEGIN:VCARD
 VERSION:3.0
@@ -220,6 +219,12 @@ X-RADICALE-NAME:test.vcf
 END:VCARD</CR:address-data>
       </prop>
       <status>HTTP/1.1 200 OK</status>
+    </propstat>
+    <propstat>
+      <prop>
+        <displayname />
+      </prop>
+      <status>HTTP/1.1 404 Not Found</status>
     </propstat>
   </response>
 </multistatus>
