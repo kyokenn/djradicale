@@ -15,12 +15,25 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import json
+import os
+import logging
+
 from datetime import datetime
 
 from contextlib import contextmanager
 from radicale import ical
 
 from ..models import DBCollection, DBItem, DBProperties
+
+logger = logging.getLogger('djradicale')
+
+ICAL_TYPES = (
+    ical.Event,
+    ical.Todo,
+    ical.Journal,
+    ical.Card,
+    ical.Timezone,
+)
 
 
 class Collection(ical.Collection):
@@ -30,41 +43,33 @@ class Collection(ical.Collection):
             ical.Header("PRODID:-//Radicale//NONSGML Radicale Server//EN"),
             ical.Header("VERSION:%s" % self.version))
 
-    def write(self, headers=None, items=None):
-        headers = headers or self.headers
-        items = items if items is not None else self.items
-
-        timezones = list(set(filter(
-            lambda x: isinstance(x, ical.Timezone), items.values())))
-        components = list(filter(
-            lambda x: isinstance(x, ical.Component), items.values()))
-
-        for component in components:
-            text = ical.serialize(self.tag, headers, [component] + timezones)
-            collection, created = DBCollection.objects.get_or_create(
-                path=self.path,
-                parent_path='/'.join(self.path.split('/')[:-1]))
-            item, created = DBItem.objects.get_or_create(
-                collection=collection, name=component.name)
-            item.text = text
-            item.save()
-
     def delete(self):
+        DBItem.objects.filter(collection__path=self.path).delete()
         DBCollection.objects.filter(path=self.path).delete()
         DBProperties.objects.filter(path=self.path).delete()
+
+    def append(self, name, text):
+        collection, ccreated = DBCollection.objects.get_or_create(
+            path=self.path, parent_path=os.path.dirname(self.path))
+        item, icreated = DBItem.objects.get_or_create(
+            collection=collection, name=name)
+        item.text = text
+        item.save()
 
     def remove(self, name):
         DBItem.objects.filter(collection__path=self.path, name=name).delete()
 
+    def replace(self, name, text):
+        collection = DBCollection.objects.get(
+            path=self.path, parent_path=os.path.dirname(self.path))
+        item = DBItem.objects.get(
+            collection=collection, name=name)
+        item.text = text
+        item.save()
+
     @property
     def text(self):
-        components = (
-            ical.Timezone, ical.Event, ical.Todo, ical.Journal, ical.Card)
-        items = {}
-        for item in DBItem.objects.filter(collection__path=self.path):
-            items.update(self._parse(item.text, components))
-        return ical.serialize(
-            self.tag, self.headers, items.values())
+        return ical.serialize(self.tag, self.headers, self.items.values())
 
     @classmethod
     def children(cls, path):
@@ -131,3 +136,10 @@ class Collection(ical.Collection):
             props, created = DBProperties.objects.get_or_create(path=self.path)
             props.text = json.dumps(properties)
             props.save()
+
+    @property
+    def items(self):
+        items = {}
+        for item in DBItem.objects.filter(collection__path=self.path):
+            items.update(self._parse(item.text, ICAL_TYPES))
+        return items

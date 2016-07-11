@@ -89,7 +89,7 @@ class DjRadicaleTestCase(TestCase):
             'response': '''<?xml version="1.0"?>
 <multistatus xmlns="DAV:" xmlns:CR="urn:ietf:params:xml:ns:carddav" xmlns:CS="http://calendarserver.org/ns/">
   <response>
-    <href>%(path)s</href>
+    <href>{path}</href>
     <propstat>
       <prop>
         <resourcetype>
@@ -132,7 +132,7 @@ class DjRadicaleTestCase(TestCase):
             'response': '''<?xml version="1.0"?>
 <multistatus xmlns="DAV:">
   <response>
-    <href>%(path)s</href>
+    <href>{path}</href>
     <propstat>
       <prop>
         <displayname>addressbook.vcf</displayname>
@@ -152,7 +152,7 @@ VERSION:3.0
 PRODID:-//Inverse inc.//SOGo Connector 1.0//EN
 UID:test.vcf
 N:a;a
-FN:a a
+FN:{fn}
 TEL;TYPE=cell:+1234567890
 X-MOZILLA-HTML:FALSE
 END:VCARD
@@ -167,7 +167,7 @@ VERSION:3.0
 PRODID:-//Inverse inc.//SOGo Connector 1.0//EN
 UID:test.vcf
 N:a;a
-FN:a a
+FN:{fn}
 TEL;TYPE=cell:+1234567890
 X-MOZILLA-HTML:FALSE
 X-RADICALE-NAME:test.vcf
@@ -182,7 +182,7 @@ END:VCARD''',
         <D:getetag/>
         <C:address-data/>
     </D:prop>
-    <D:href xmlns:D="DAV:">%(path)s</D:href>
+    <D:href xmlns:D="DAV:">{path}</D:href>
 </C:addressbook-multiget>
 ''',
             'response': '''<?xml version="1.0"?>
@@ -197,22 +197,22 @@ END:VCARD''',
         <D:getetag/>
         <C:address-data/>
     </D:prop>
-    <D:href xmlns:D="DAV:">%(path)s</D:href>
+    <D:href xmlns:D="DAV:">{path}</D:href>
 </C:addressbook-multiget>
 ''',
             'response': '''<?xml version="1.0"?>
 <multistatus xmlns="DAV:" xmlns:CR="urn:ietf:params:xml:ns:carddav">
   <response>
-    <href>%(path)stest.vcf</href>
+    <href>{path}test.vcf</href>
     <propstat>
       <prop>
-        <getetag>"2872777bafe841d06a74715130d904e0"</getetag>
+        <getetag>"{etag}"</getetag>
         <CR:address-data>BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Inverse inc.//SOGo Connector 1.0//EN
 UID:test.vcf
 N:a;a
-FN:a a
+FN:{fn}
 TEL;TYPE=cell:+1234567890
 X-MOZILLA-HTML:FALSE
 X-RADICALE-NAME:test.vcf
@@ -236,7 +236,7 @@ END:VCARD</CR:address-data>
             'response': '''<?xml version="1.0"?>
 <multistatus xmlns="DAV:">
   <response>
-    <href>%(path)s</href>
+    <href>{path}</href>
     <status>HTTP/1.1 200 OK</status>
   </response>
 </multistatus>
@@ -251,79 +251,118 @@ END:VCARD</CR:address-data>
         self.client = DAVClient()
 
     def propfind_1_anonymous(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/'})
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/',
+        })
         response = self.client.propfind(
-            path, data=self.DATA_CASES['PROPFIND_1']['request'] % {'path': path})
+            path, data=self.DATA_CASES['PROPFIND_1']['request'].format(**{
+                'path': path,
+            }))
         self.assertEqual(response.status_code, 401)
 
     def propfind_1(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/'})
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/',
+        })
         response = self.client.propfind(
-            path, data=self.DATA_CASES['PROPFIND_1']['request'] % {'path': path})
+            path, data=self.DATA_CASES['PROPFIND_1']['request'].format(**{
+                'path': path,
+            }))
         self.assertEqual(response.status_code, 207)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['PROPFIND_1']['response'] % {'path': path})
+            self.DATA_CASES['PROPFIND_1']['response'].format(**{
+                'path': path,
+            }))
 
     def propfind_2(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/'})
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/',
+        })
         response = self.client.propfind(
-            path, data=self.DATA_CASES['PROPFIND_2']['request'] % {'path': path})
+            path, data=self.DATA_CASES['PROPFIND_2']['request'].format(**{
+                'path': path,
+            }))
         self.assertEqual(response.status_code, 207)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['PROPFIND_2']['response'] % {'path': path})
+            self.DATA_CASES['PROPFIND_2']['response'].format(**{
+                'path': path,
+            }))
 
     def report_empty(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/'})
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/',
+        })
         response = self.client.report(
-            path, data=self.DATA_CASES['REPORT_EMPTY']['request'] % {'path': path})
+            path, data=self.DATA_CASES['REPORT_EMPTY']['request'].format(**{
+                'path': path,
+            }))
         self.assertEqual(response.status_code, 207)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['REPORT_EMPTY']['response'] % {'path': path})
+            self.DATA_CASES['REPORT_EMPTY']['response'].format(**{
+                'path': path,
+            }))
 
-    def report(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/'})
+    def report(self, fn, etag):
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/',
+        })
         response = self.client.report(
-            path, data=self.DATA_CASES['REPORT']['request'] % {'path': path})
+            path, data=self.DATA_CASES['REPORT']['request'].format(**{
+                'path': path,
+            }))
         self.assertEqual(response.status_code, 207)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['REPORT']['response'] % {'path': path})
+            self.DATA_CASES['REPORT']['response'].format(**{
+                'path': path,
+                'fn': fn,
+                'etag': etag,
+            }))
 
-    def put(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/test.vcf'})
+    def put(self, fn):
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/test.vcf',
+        })
         response = self.client.put(
-            path, data=self.DATA_CASES['PUT']['request'] % {'path': path})
+            path, data=self.DATA_CASES['PUT']['request'].format(**{
+                'path': path,
+                'fn': fn,
+            }))
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['PUT']['response'] % {'path': path})
+            self.DATA_CASES['PUT']['response'].format(**{
+                'path': path,
+                'fn': fn,
+            }))
 
-    def get(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/test.vcf'})
+    def get(self, fn):
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/test.vcf',
+        })
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['GET']['response'] % {'path': path})
+            self.DATA_CASES['GET']['response'].format(**{
+                'path': path,
+                'fn': fn,
+            }))
 
     def delete(self):
-        path = reverse('djradicale:application',
-                       kwargs={'url': 'user/addressbook.vcf/test.vcf'})
+        path = reverse('djradicale:application', kwargs={
+            'url': 'user/addressbook.vcf/test.vcf',
+        })
         response = self.client.delete(path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.content.decode(),
-            self.DATA_CASES['DELETE']['response'] % {'path': path})
+            self.DATA_CASES['DELETE']['response'].format(**{
+                'path': path,
+            }))
 
     def test_everything(self):
         self.propfind_1_anonymous()
@@ -331,7 +370,13 @@ END:VCARD</CR:address-data>
         self.propfind_1()
         self.propfind_2()
         self.report_empty()
-        self.put()
-        self.get()
-        self.report()
+        # create
+        self.put(fn='John Smith')
+        self.get(fn='John Smith')
+        self.report(fn='John Smith', etag='faefbfea2f89431c973bbfd8002d52c8')
+        # update
+        self.put(fn='J.S.')
+        self.get(fn='J.S.')
+        self.report(fn='J.S.', etag='6a3d7c7349b462583dba21fbb6321f6b')
         self.delete()
+        self.report_empty()
