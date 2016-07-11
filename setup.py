@@ -12,7 +12,7 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.0.8',
+    'version': '0.0.9',
     'author': 'Okami',
     'author_email': 'okami@fuzetsu.info',
     'description': (

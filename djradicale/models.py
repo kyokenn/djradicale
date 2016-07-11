@@ -101,7 +101,7 @@ class DBItem(models.Model):
         lines = filter(
             lambda x: x.startswith(field + ':'), self.text.split('\n'))
         if lines:
-            return next(lines).lstrip(field + ':')
+            return next(lines)[len(field + ':'):]
 
     @property
     def fn(self):
