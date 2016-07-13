@@ -49,23 +49,21 @@ class Collection(ical.Collection):
         DBProperties.objects.filter(path=self.path).delete()
 
     def append(self, name, text):
-        collection, ccreated = DBCollection.objects.get_or_create(
-            path=self.path, parent_path=os.path.dirname(self.path))
-        item, icreated = DBItem.objects.get_or_create(
-            collection=collection, name=name)
-        item.text = text
-        item.save()
+        new_items = self._parse(text, ICAL_TYPES, name)
+        for new_item in new_items.values():
+            collection, ccreated = DBCollection.objects.get_or_create(
+                path=self.path, parent_path=os.path.dirname(self.path))
+            item, icreated = DBItem.objects.get_or_create(
+                collection=collection, name=name)
+            item.text = ical.serialize(
+                self.tag, self.headers, [new_item] + self.timezones)
+            item.save()
 
     def remove(self, name):
         DBItem.objects.filter(collection__path=self.path, name=name).delete()
 
-    def replace(self, name, text):
-        collection = DBCollection.objects.get(
-            path=self.path, parent_path=os.path.dirname(self.path))
-        item = DBItem.objects.get(
-            collection=collection, name=name)
-        item.text = text
-        item.save()
+    # def replace(self, name, text):
+    #     raise NotImplementedError
 
     @property
     def text(self):
