@@ -54,6 +54,9 @@ class Collection(ical.Collection):
             lambda x: x.tag == ical.Timezone.tag, new_items.values()))
 
         for new_item in new_items.values():
+            if new_item.tag == ical.Timezone.tag:
+                continue
+
             collection, ccreated = DBCollection.objects.get_or_create(
                 path=self.path, parent_path=os.path.dirname(self.path))
             item, icreated = DBItem.objects.get_or_create(

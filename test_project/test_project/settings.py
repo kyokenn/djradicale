@@ -96,6 +96,7 @@ LOGGING = {
         'djradicale': {
             'handlers': ['console'],
             'level': 'DEBUG',
+            # 'level': 'ERROR',
             'propagate': True,
         },
     }
