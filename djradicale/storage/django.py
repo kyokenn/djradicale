@@ -50,10 +50,10 @@ class Collection(ical.Collection):
 
     def append(self, name, text):
         new_items = self._parse(text, ICAL_TYPES, name)
-        for new_item in new_items.values():
-            timezones = list(filter(
-                lambda x: x.tag == ical.Timezone.tag, new_items.values()))
+        timezones = list(filter(
+            lambda x: x.tag == ical.Timezone.tag, new_items.values()))
 
+        for new_item in new_items.values():
             collection, ccreated = DBCollection.objects.get_or_create(
                 path=self.path, parent_path=os.path.dirname(self.path))
             item, icreated = DBItem.objects.get_or_create(

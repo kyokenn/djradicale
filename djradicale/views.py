@@ -67,8 +67,8 @@ class DjRadicaleView(Application, View):
             return self.http_method_not_allowed(request, *args, **kwargs)
         response = ApplicationResponse()
         answer = self(request.META, response.start_response)
-        if answer:
-            response.write(answer[0])
+        for i in answer:
+            response.write(i)
         return response
 
 

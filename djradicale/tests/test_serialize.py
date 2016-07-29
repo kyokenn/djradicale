@@ -433,7 +433,7 @@ END:VCALENDAR''',
 
         '''BEGIN:VCALENDAR
 PRODID:-//Radicale//NONSGML Radicale Server//EN
-VERSION:1.0
+VERSION:2.0
 BEGIN:VTIMEZONE
 TZID:/freeassociation.sourceforge.net/Europe/Moscow
 X-LIC-LOCATION:Europe/Moscow
@@ -906,15 +906,25 @@ END:VCALENDAR
 '''),
         )
 
+    HEADERS = (
+        ical.Header('PRODID:-//Radicale//NONSGML Radicale Server//EN'),
+        ical.Header('VERSION:2.0'))
+    TAG = 'VCALENDAR'
+
     maxDiff = None
 
     def test_serialization(self):
-        for text, stored in self.DATA_CASES:
-            name = '20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics'
-            items = ical.Collection._parse(text, ICAL_TYPES, name)
-            timezones = list(filter(lambda x: x.tag == ical.Timezone.tag, items.values()))
-            headers = (
-                ical.Header('PRODID:-//Radicale//NONSGML Radicale Server//EN'),
-                ical.Header('VERSION:1.0'))
-            serialized = ical.serialize('VCALENDAR', headers, [items[name]] + timezones)
-            self.assertEqual(serialized, stored)
+        name = '20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics'
+
+        for input_text, stored_text in self.DATA_CASES:
+            items = ical.Collection._parse(input_text, ICAL_TYPES, name)
+            self.assertEqual(name in items, True)
+
+            timezones = list(filter(
+                lambda x: x.tag == ical.Timezone.tag, items.values()))
+            serialized_text = ical.serialize(
+                self.TAG, self.HEADERS, [items[name]] + timezones)
+            self.assertEqual(serialized_text, stored_text)
+
+            items2 = ical.Collection._parse(serialized_text, ICAL_TYPES, name)
+            self.assertEqual(name in items2, True)
