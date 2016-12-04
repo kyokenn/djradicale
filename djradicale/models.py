@@ -98,10 +98,9 @@ class DBItem(models.Model):
         return self.name
 
     def _get_field(self, field):
-        lines = filter(
-            lambda x: x.startswith(field + ':'), self.text.split('\n'))
-        if lines:
-            return next(lines)[len(field + ':'):]
+        for line in self.text.split('\n'):
+            if line.startswith(field + ':'):
+                return line[len(field + ':'):]
 
     @property
     def fn(self):
