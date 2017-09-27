@@ -16,10 +16,13 @@
 
 from django.contrib.auth import authenticate
 
+from radicale.auth import BaseAuth
 
-def is_authenticated(user, password):
-    user = authenticate(username=user, password=password)
-    if user is not None:
-        if user.is_active:
-            return True
-    return False
+
+class Auth(BaseAuth):
+    def is_authenticated(user, password):
+        user = authenticate(username=user, password=password)
+        if user is not None:
+            if user.is_active:
+                return True
+        return False

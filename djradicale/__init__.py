@@ -18,37 +18,16 @@ import logging
 import radicale.config
 import radicale.log
 
-try:
-    from configparser import RawConfigParser as ConfigParser
-except ImportError:
-    from ConfigParser import RawConfigParser as ConfigParser
-
-try:
-    from io import StringIO as StringIO
-except ImportError:
-    from StringIO import StringIO as StringIO
-
 from django.conf import settings
 
-
-class HashableConfigParser(ConfigParser):
-    def __hash__(self):
-        output = StringIO()
-        self.write(output)
-        hash_ = hash(output.getvalue())
-        output.close()
-        return hash_
-
-# make the config module hashable for django
-radicale.config.__class__ = HashableConfigParser
+old_load = radicale.config.load
 
 
-for section, values in settings.DJRADICALE_CONFIG.items():
-    for key, value in values.items():
-        if not radicale.config.has_section(section):
-            radicale.config.add_section(section)
-        radicale.config.set(section, key, value)
+def new_load(*args, **kwargs):
+    return old_load(extra_config=settings.DJRADICALE_CONFIG)
 
+
+radicale.config.load = new_load
 radicale.log.LOGGER = logging.getLogger('djradicale')
 
 default_app_config = 'djradicale.config.DjRadicaleConfig'

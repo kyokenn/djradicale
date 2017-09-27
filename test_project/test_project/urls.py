@@ -26,8 +26,7 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^' + settings.DJRADICALE_CONFIG['server']['base_prefix'].lstrip('/'),
-        include('djradicale.urls', namespace='djradicale')),
+    url(r'^pim/', include('djradicale.urls', namespace='djradicale')),
 
     # .well-known external implementation
     url(r'^\.well-known/(?P<type>(caldav|carddav))$',

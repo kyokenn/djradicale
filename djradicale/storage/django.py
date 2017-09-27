@@ -21,21 +21,24 @@ import logging
 from datetime import datetime
 
 from contextlib import contextmanager
-from radicale import ical
+# from radicale import ical
+from radicale.storage import BaseCollection
 
 from ..models import DBCollection, DBItem, DBProperties
 
 logger = logging.getLogger('djradicale')
 
-ICAL_TYPES = (
-    ical.Event,
-    ical.Todo,
-    ical.Journal,
-    ical.Card,
-    ical.Timezone,
-)
+# ICAL_TYPES = (
+#     ical.Event,
+#     ical.Todo,
+#     ical.Journal,
+#     ical.Card,
+#     ical.Timezone,
+# )
 
 
+# TODO: port to radicale.storage.BaseCollection API
+# class Collection(BaseCollection):
 class Collection(ical.Collection):
     @property
     def headers(self):

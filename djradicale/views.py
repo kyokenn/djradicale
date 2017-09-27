@@ -16,6 +16,7 @@
 
 import base64
 import copy
+import logging
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -25,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, View
 from django.utils.decorators import method_decorator
 
-from radicale import Application
+from radicale import Application, config
 
 
 class ApplicationResponse(HttpResponse):
@@ -51,7 +52,15 @@ class DjRadicaleView(Application, View):
     ]
 
     def __init__(self, **kwargs):
-        super(DjRadicaleView, self).__init__()
+        # radicale/__main__.py:
+        # configuration = config.load(config_paths,
+        #                             ignore_missing_paths=ignore_missing_paths)
+        # serve(configuration, logger)
+
+        configuration = config.load(extra_config=settings.DJRADICALE_CONFIG)
+        logger = logging.getLogger('djradicale')
+
+        super(DjRadicaleView, self).__init__(configuration, logger)
         super(View, self).__init__(**kwargs)
 
     def do_HEAD(self, environ, read_collections, write_collections, content,

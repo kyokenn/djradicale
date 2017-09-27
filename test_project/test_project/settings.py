@@ -103,30 +103,27 @@ LOGGING = {
 }
 
 DJRADICALE_CONFIG = {
-    'server': {
-        'base_prefix': '/pim/',
-        'realm': 'Radicale - Password Required',
-    },
-    'encoding': {
-        'request': 'utf-8',
-        'stock': 'utf-8',
-    },
+    # 'server': {
+    #     'base_prefix': '/pim/',
+    #     'realm': 'Radicale - Password Required',
+    # },
+    # 'encoding': {
+    #     'request': 'utf-8',
+    #     'stock': 'utf-8',
+    # },
     'auth': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.auth.django',
+        'type': 'djradicale.auth.django',
     },
     'rights': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.rights.django',
+        'type': 'djradicale.rights.django',
     },
     'storage': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.storage.django',
+        'type': 'djradicale.storage.django',
     },
-    'well-known': {
-        'carddav': '/pim/%(user)s/addressbook.vcf',
-        'caldav': '/pim/%(user)s/calendar.ics',
-    },
+    # 'well-known': {
+    #     'carddav': '/pim/%(user)s/addressbook.vcf',
+    #     'caldav': '/pim/%(user)s/calendar.ics',
+    # },
 }
 
 DJRADICALE_RIGHTS = {
