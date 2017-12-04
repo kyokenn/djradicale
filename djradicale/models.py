@@ -81,7 +81,7 @@ class DBItem(models.Model):
     '''
 
     collection = models.ForeignKey(
-        'DBCollection', verbose_name='Collection', related_name='items')
+        'DBCollection', verbose_name='Collection', related_name='items', on_delete=models.CASCADE)
     name = models.TextField('Name')
     text = models.TextField('Text')
     timestamp = models.DateTimeField('Timestamp', auto_now=True)
