@@ -12,7 +12,7 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.1.0',
+    'version': '0.0.14',
     'author': 'Kyoken',
     'author_email': 'kyoken@kyoken.ninja',
     'description': (
@@ -38,7 +38,7 @@ data = {
         'Framework :: Django',
     ],
     'install_requires': [
-        'Django >= 1.7',
+        'Django >= 2.0',
         'Radicale == 2.1.1',
     ],
 }
