@@ -22,7 +22,7 @@ Requirements
 ============
 
 * Python >= 3.0
-* Django >= 1.7
+* Django >= 1.9
 * Radicale >= 1.1.1
 
 
@@ -97,7 +97,7 @@ Modify you urls.py
 urlpatterns = [
     ...
     url(r'^' + settings.DJRADICALE_CONFIG['server']['base_prefix'].lstrip('/'),
-        include('djradicale.urls', namespace='djradicale')),
+        include(('djradicale.urls', 'djradicale'))),
     ...
 ]
 ```
