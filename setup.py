@@ -12,16 +12,16 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.0.13',
-    'author': 'Okami',
-    'author_email': 'okami@fuzetsu.info',
+    'version': '0.0.14',
+    'author': 'Kyoken',
+    'author_email': 'kyoken@kyoken.ninja',
     'description': (
         'Radicale is a free and open-source CalDAV and CardDAV server.'
         'DjRadicale is an Django Application for integration Radicale '
         'with a Django.'),
     'license': 'GPLv3',
     'keywords': 'django radicale carddav caldav',
-    'url': 'https://github.com/okami-1/djradicale',
+    'url': 'https://github.com/kyokenn/djradicale',
     'packages': [
         'djradicale',
         'djradicale.auth',
@@ -38,8 +38,8 @@ data = {
         'Framework :: Django',
     ],
     'install_requires': [
-        'Django >= 1.7',
-        'Radicale >= 1.1.1',
+        'Django >= 2.0',
+        'Radicale == 1.1.1',
     ],
 }
 
