@@ -26,7 +26,7 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^' + settings.DJRADICALE_CONFIG['server']['base_prefix'].lstrip('/'),
+    url(r'^' + settings.DJRADICALE_CONFIG_EXTRA['server']['base_prefix'].lstrip('/'),
         include(('djradicale.urls', 'djradicale'))),
 
     # .well-known external implementation

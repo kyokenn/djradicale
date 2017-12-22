@@ -17,93 +17,95 @@
 import json
 import os
 import logging
-
-from datetime import datetime
+import datetime
 
 from contextlib import contextmanager
-# from radicale import ical
-from radicale.storage import BaseCollection
+
+from django.db import transaction
+
+from radicale.storage import BaseCollection, Item
 
 from ..models import DBCollection, DBItem, DBProperties
 
 logger = logging.getLogger('djradicale')
 
-# ICAL_TYPES = (
-#     ical.Event,
-#     ical.Todo,
-#     ical.Journal,
-#     ical.Card,
-#     ical.Timezone,
-# )
 
-
-# TODO: port to radicale.storage.BaseCollection API
-# class Collection(BaseCollection):
-class Collection(ical.Collection):
-    @property
-    def headers(self):
-        return (
-            ical.Header('PRODID:-//Radicale//NONSGML Radicale Server//EN'),
-            ical.Header('VERSION:%s' % self.version))
-
-    def delete(self):
-        DBItem.objects.filter(collection__path=self.path).delete()
-        DBCollection.objects.filter(path=self.path).delete()
-        DBProperties.objects.filter(path=self.path).delete()
-
-    def append(self, name, text):
-        new_items = self._parse(text, ICAL_TYPES, name)
-        timezones = list(filter(
-            lambda x: x.tag == ical.Timezone.tag, new_items.values()))
-
-        for new_item in new_items.values():
-            if new_item.tag == ical.Timezone.tag:
-                continue
-
-            collection, ccreated = DBCollection.objects.get_or_create(
-                path=self.path, parent_path=os.path.dirname(self.path))
-            item, icreated = DBItem.objects.get_or_create(
-                collection=collection, name=name)
-
-            item.text = ical.serialize(
-                self.tag, self.headers, [new_item] + timezones)
-            item.save()
-
-    def remove(self, name):
-        DBItem.objects.filter(collection__path=self.path, name=name).delete()
-
-    # def replace(self, name, text):
-    #     raise NotImplementedError
-
-    @property
-    def text(self):
-        return ical.serialize(self.tag, self.headers, self.items.values())
+class Collection(BaseCollection):
+    def __init__(self, path, **kwargs):
+        self.path = path
 
     @classmethod
-    def children(cls, path):
-        children = list(
-            DBCollection.objects
-            .filter(parent_path=path or '')
-            .values_list('path', flat=True))
-        return map(cls, children)
+    def discover(cls, path, depth='0'):
+        for c in DBCollection.objects.filter(parent_path=path or ''):
+            yield cls(c.path)
 
     @classmethod
-    def is_node(cls, path):
-        result = True
-        if path:
-            result = (
-                DBCollection.objects
-                .filter(parent_path=path or '').exists())
-        return result
+    def create_collection(cls, href, collection=None, props=None):
+        c, created = DBCollection.objects.get_or_create(
+            path=href, parent_path=os.path.dirname(href))
+        # if created:
+        #     p, created = DBProperties.objects.filter(path=href)
+        return c
 
-    @classmethod
-    def is_leaf(cls, path):
-        result = False
-        if path:
-            result = (
+    def list(self):
+        items = DBItem.objects.filter(collection__path=self.path)
+        for i in items:
+            yield i.path
+
+    def get(self, href):
+        try:
+            item = (
                 DBItem.objects
-                .filter(collection__path=path or '').exists())
-        return result
+                .filter(collection__path=self.path)
+                .get(path=href))
+            return Item(self, href=item.path, last_modified=self.last_modified)
+        except DBItem.DoesNotExist:
+            pass
+
+    def get_multi(self, hrefs):
+        items = self.get_multi2(hrefs)
+        if items:
+            list(zip(*items))[1]
+
+    def get_multi2(self, hrefs):
+        items = (
+            DBItem.objects
+            .filter(collection__path=self.path)
+            .filter(path__in=hrefs))
+        for item in items:
+            yield item.path, Item(self, href=item.path,
+                                  last_modified=self.last_modified)
+
+    def has(self, href):
+        return (
+            DBItem.objects
+            .filter(collection__path=self.path, path=href)
+            .exists())
+
+    def delete(self, href=None):
+        if href is None:
+            DBItem.objects.filter(collection__path=self.path).delete()
+            DBCollection.objects.filter(path=self.path).delete()
+            DBProperties.objects.filter(path=self.path).delete()
+        else:
+            DBItem.objects.filter(
+                collection__path=self.path, path=href).delete()
+
+    def get_meta(self, key=None):
+        try:
+            p = DBProperties.objects.get(path=self.path)
+            meta = json.loads(p.text)
+            if key is None:
+                return meta
+            else:
+                return meta.get(key)
+        except DBProperties.DoesNotExist:
+            pass
+
+    def set_meta(self, props):
+        p, created = DBProperties.objects.filter(path=self.path)
+        p.text = json.dumps(props)
+        p.save()
 
     @property
     def last_modified(self):
@@ -113,41 +115,10 @@ class Collection(ical.Collection):
             pass
         else:
             if collection.last_modified:
-                return datetime.strftime(
+                return datetime.datetime.strftime(
                     collection.last_modified, '%a, %d %b %Y %H:%M:%S %z')
 
-    @property
-    def tag(self):
-        with self.props as props:
-            if 'tag' not in props:
-                if self.path.endswith(('.vcf', '/carddav')):
-                    props['tag'] = 'VADDRESSBOOK'
-                else:
-                    props['tag'] = 'VCALENDAR'
-            return props['tag']
-
-    @property
-    @contextmanager
-    def props(self):
-        # On enter
-        properties = {}
-        try:
-            props = DBProperties.objects.get(path=self.path)
-        except DBProperties.DoesNotExist:
-            pass
-        else:
-            properties.update(json.loads(props.text))
-        old_properties = properties.copy()
-        yield properties
-        # On exit
-        if old_properties != properties and DBCollection.objects.filter(path=self.path).exists():
-            props, created = DBProperties.objects.get_or_create(path=self.path)
-            props.text = json.dumps(properties)
-            props.save()
-
-    @property
-    def items(self):
-        items = {}
-        for item in DBItem.objects.filter(collection__path=self.path):
-            items.update(self._parse(item.text, ICAL_TYPES))
-        return items
+    @classmethod
+    # @contextmanager
+    def acquire_lock(cls, mode, user=None):
+        return transaction.atomic()

@@ -20,9 +20,15 @@ from radicale.auth import BaseAuth
 
 
 class Auth(BaseAuth):
-    def is_authenticated(user, password):
+    def is_authenticated(self, user, password):
         user = authenticate(username=user, password=password)
         if user is not None:
             if user.is_active:
                 return True
         return False
+
+    def is_authenticated2(self, login, user, password):
+        if login != user:
+            return False
+
+        return self.is_authenticated(user, password)

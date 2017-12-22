@@ -27,6 +27,7 @@ except ImportError:
 from django.conf import settings
 
 from radicale import log
+from radicale.rights import BaseRights
 
 
 # Default configuration
@@ -39,41 +40,40 @@ INITIAL_RIGHTS = {
 }
 
 
-def _read_from_sections(user, collection_url, permission):
-    regex = ConfigParser({'login': user, 'path': collection_url})
-    for rights in (INITIAL_RIGHTS, settings.DJRADICALE_RIGHTS):
-        for section, values in rights.items():
-            if not regex.has_section(section):
-                regex.add_section(section)
-            for key, value in values.items():
-                regex.set(
-                    section, key,
-                    value % {
-                        'login': re.escape(user),
-                        'path': re.escape(collection_url),
-                    })
-    log.LOGGER.debug("Rights type '%s'" % __name__)
+class Rights(BaseRights):
+    def authorized(self, user, path, permission):
+        # collection_url = collection.url.rstrip('/') or '/'
+        # if collection_url in ('.well-known/carddav', '.well-known/caldav'):
+        #     return permission == 'r'
+        # return _read_from_sections(user or '', collection_url, permission)
 
-    for section in regex.sections():
-        re_user = regex.get(section, 'user')
-        re_collection = regex.get(section, 'collection')
-        log.LOGGER.debug(
-            "Test if '%s:%s' matches against '%s:%s' from section '%s'" % (
-                user, collection_url, re_user, re_collection, section))
-        user_match = re.match(re_user, user)
-        if user_match:
-            re_collection = re_collection.format(*user_match.groups())
-            if re.match(re_collection, collection_url):
-                log.LOGGER.debug("Section '%s' matches" % section)
-                if permission in regex.get(section, 'permission'):
-                    return True
-            else:
-                log.LOGGER.debug("Section '%s' does not match" % section)
-    return False
+        regex = ConfigParser({'login': user, 'path': path})
+        for rights in (INITIAL_RIGHTS, settings.DJRADICALE_RIGHTS):
+            for section, values in rights.items():
+                if not regex.has_section(section):
+                    regex.add_section(section)
+                for key, value in values.items():
+                    regex.set(
+                        section, key,
+                        value % {
+                            'login': re.escape(user),
+                            'path': re.escape(path),
+                        })
+        self.logger.debug("Rights type '%s'" % __name__)
 
-
-def authorized(user, collection, permission):
-    collection_url = collection.url.rstrip('/') or '/'
-    if collection_url in ('.well-known/carddav', '.well-known/caldav'):
-        return permission == 'r'
-    return _read_from_sections(user or '', collection_url, permission)
+        for section in regex.sections():
+            re_user = regex.get(section, 'user')
+            re_collection = regex.get(section, 'collection')
+            log.LOGGER.debug(
+                "Test if '%s:%s' matches against '%s:%s' from section '%s'" % (
+                    user, path, re_user, re_collection, section))
+            user_match = re.match(re_user, user)
+            if user_match:
+                re_collection = re_collection.format(*user_match.groups())
+                if re.match(re_collection, path):
+                    self.logger.debug("Section '%s' matches" % section)
+                    if permission in regex.get(section, 'permission'):
+                        return True
+                else:
+                    self.logger.debug("Section '%s' does not match" % section)
+        return False
