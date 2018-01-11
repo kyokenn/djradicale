@@ -45,7 +45,7 @@ class DBCollection(models.Model):
     '''
 
     objects = DBCollectionQuerySet.as_manager()
-    path = models.TextField('Path', unique=True)
+    path = models.CharField('Path', max_length=255, unique=True)
     parent_path = models.TextField('Parent Path')
 
     def get_absolute_url(self):
@@ -82,7 +82,7 @@ class DBItem(models.Model):
 
     collection = models.ForeignKey(
         'DBCollection', verbose_name='Collection', related_name='items', on_delete=models.CASCADE)
-    name = models.TextField('Name')
+    name = models.CharField('Name', max_length=255)
     text = models.TextField('Text')
     timestamp = models.DateTimeField('Timestamp', auto_now=True)
 
@@ -123,7 +123,7 @@ class DBProperties(models.Model):
     Table of collection`s properties.
     '''
 
-    path = models.TextField('Path', unique=True)
+    path = models.CharField('Path', max_length=255, unique=True)
     text = models.TextField('Text')
 
     @property
