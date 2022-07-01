@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Okami, okami@fuzetsu.info
+# Copyright (C) 2022 Kyoken, kyoken@kyoken.ninja
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 from django.http import HttpResponse
+from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, View
-from django.utils.decorators import method_decorator
 
-from radicale import Application, config
+from radicale import Application, config, log
 
 
 class ApplicationResponse(HttpResponse):
@@ -52,16 +52,9 @@ class DjRadicaleView(Application, View):
     ]
 
     def __init__(self, **kwargs):
-        # radicale/__main__.py:
-        # configuration = config.load(config_paths,
-        #                             ignore_missing_paths=ignore_missing_paths)
-        # serve(configuration, logger)
-
-        configuration = config.load(extra_config=settings.DJRADICALE_CONFIG)
-        logger = logging.getLogger('djradicale')
-
-        super(DjRadicaleView, self).__init__(configuration, logger)
-        super(View, self).__init__(**kwargs)
+        configuration = config.load()
+        Application.__init__(self, configuration)
+        View.__init__(self, **kwargs)
 
     def do_HEAD(self, environ, read_collections, write_collections, content,
                 user):
@@ -75,26 +68,26 @@ class DjRadicaleView(Application, View):
         if not request.method.lower() in self.http_method_names:
             return self.http_method_not_allowed(request, *args, **kwargs)
         response = ApplicationResponse()
+
+        path = request.META['PATH_INFO']
+        if path.startswith(settings.DJRADICALE_PREFIX):
+            # cut known prefix from path (PATH_INFO) and
+            # move it into the base prefix (HTTP_X_SCRIPT_NAME)
+            request.META['PATH_INFO'] = path[len(settings.DJRADICALE_PREFIX):]
+            request.META['HTTP_X_SCRIPT_NAME'] = settings.DJRADICALE_PREFIX.rstrip('/')
+
         answer = self(request.META, response.start_response)
         for i in answer:
             response.write(i)
         return response
 
 
-class WellKnownView(DjRadicaleView):
+class WellKnownView(RedirectView):
+    type = 'caldav'
+
+    def get_redirect_url(self):
+        return self.request.build_absolute_uri(settings.DJRADICALE_PREFIX)
+
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        # do not authentificate yet, just get the username
-        if 'HTTP_AUTHORIZATION' in self.request.META:
-            auth = request.META['HTTP_AUTHORIZATION'].split()
-            if len(auth) == 2:
-                if auth[0].lower() == 'basic':
-                    user, password = base64.b64decode(
-                        auth[1]).decode().split(':')
-                    if kwargs.get('type') == 'carddav':
-                        url = '%s/addressbook.vcf/' % user
-                    else:
-                        url = '%s/calendar.ics/' % user
-                    request.META['PATH_INFO'] = reverse(
-                        'djradicale:application', kwargs={'url': url})
-        return super().dispatch(request, *args, **kwargs)
+        return self.get(request, *args, **kwargs)

@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Okami, okami@fuzetsu.info
+# Copyright (C) 2022 Kyoken, kyoken@kyoken.ninja
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,19 +15,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import logging
+
+import radicale
 import radicale.config
-import radicale.log
 
 from django.conf import settings
 
-old_load = radicale.config.load
+
+def config_load(*args, **kwargs):
+    configuration = radicale.config.Configuration(radicale.config.DEFAULT_CONFIG_SCHEMA)
+    configuration.update(settings.DJRADICALE_CONFIG)
+    return configuration
 
 
-def new_load(*args, **kwargs):
-    return old_load(extra_config=settings.DJRADICALE_CONFIG)
-
-
-radicale.config.load = new_load
-radicale.log.LOGGER = logging.getLogger('djradicale')
+radicale.config.load = config_load
 
 default_app_config = 'djradicale.config.DjRadicaleConfig'

@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Okami, okami@fuzetsu.info
+# Copyright (C) 2022 Kyoken, kyoken@kyoken.ninja
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License

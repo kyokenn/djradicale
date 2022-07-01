@@ -22,29 +22,27 @@ from django.urls import reverse
 from django.db import models
 from django.db.models import Q
 
+from radicale.item import Item
+
 
 class DBCollectionQuerySet(models.query.QuerySet):
-    def filter_by_user(self, user, permission='rw'):
-        def is_valid(right):
-            return (
-                right['permission'] == permission and
-                re.match(right['user'], user.username))
+    def as_collections(self):
+        for c in self:
+            yield c.as_collection()
 
-        collections = map(
-            lambda x: x['collection'],
-            filter(is_valid, settings.DJRADICALE_RIGHTS.values()))
-        q = Q()
-        for collection in collections:
-            q |= Q(path__regex=collection % {'login': user.username})
-        return self.filter(q)
+
+class DBItemQuerySet(models.query.QuerySet):
+    def as_items(self):
+        for i in self:
+            yield i.as_item()
 
 
 class DBCollection(models.Model):
-    '''
+    """
     Table of collections.
-    '''
-
+    """
     objects = DBCollectionQuerySet.as_manager()
+
     path = models.TextField('Path', unique=True)
     parent_path = models.TextField('Parent Path')
 
@@ -69,6 +67,10 @@ class DBCollection(models.Model):
     def __unicode__(self):
         return self.path
 
+    def as_collection(self):
+        from .storage import Collection
+        return Collection(self.path)
+
     class Meta(object):
         db_table = 'djradicale_collection'
         verbose_name = 'Collection'
@@ -76,12 +78,14 @@ class DBCollection(models.Model):
 
 
 class DBItem(models.Model):
-    '''
-    Table of collection`s items.
-    '''
+    """
+    Table of collection's items.
+    """
+    objects = DBItemQuerySet.as_manager()
 
     collection = models.ForeignKey(
-        'DBCollection', verbose_name='Collection', related_name='items', on_delete=models.CASCADE)
+        'DBCollection', verbose_name='Collection', related_name='items',
+        on_delete=models.CASCADE)
     name = models.TextField('Name')
     text = models.TextField('Text')
     timestamp = models.DateTimeField('Timestamp', auto_now=True)
@@ -102,6 +106,14 @@ class DBItem(models.Model):
             if line.startswith(field + ':'):
                 return line[len(field + ':'):]
 
+    def as_item(self):
+        collection = self.collection.as_collection()
+        return Item(
+            collection=collection,
+            collection_path=collection.path,
+            href=self.name,
+            text=self.text)
+
     @property
     def fn(self):
         return self._get_field('FN')
@@ -119,10 +131,9 @@ class DBItem(models.Model):
 
 
 class DBProperties(models.Model):
-    '''
-    Table of collection`s properties.
-    '''
-
+    """
+    Table of collection's properties.
+    """
     path = models.TextField('Path', unique=True)
     text = models.TextField('Text')
 
