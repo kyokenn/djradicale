@@ -1,4 +1,4 @@
-# Copyright (C) 2014 Okami, okami@fuzetsu.info
+# Copyright (C) 2022 Kyoken, kyoken@kyoken.ninja
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,7 +26,9 @@ admin.autodiscover()
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('' + settings.DJRADICALE_PREFIX.lstrip('/'),
-         include(('djradicale.urls', 'djradicale-caldav'))),
-    path('.well-known/caldav', WellKnownView.as_view(type='caldav'), name='well-known-caldav'),
-    path('.well-known/carddav', WellKnownView.as_view(type='carddav'), name='well-known-carddav'),
+         include(('djradicale.urls', 'djradicale-caldav'), namespace='djradicale')),
+    path('.well-known/caldav',
+         WellKnownView.as_view(type='caldav'), name='well-known-caldav'),
+    path('.well-known/carddav',
+         WellKnownView.as_view(type='carddav'), name='well-known-carddav'),
 ]
