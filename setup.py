@@ -12,7 +12,7 @@ def read(fname):
 
 data = {
     'name': 'djradicale',
-    'version': '0.0.14',
+    'version': '0.0.16',
     'author': 'Kyoken',
     'author_email': 'kyoken@kyoken.ninja',
     'description': (
@@ -24,10 +24,7 @@ data = {
     'url': 'https://github.com/kyokenn/djradicale',
     'packages': [
         'djradicale',
-        'djradicale.auth',
         'djradicale.migrations',
-        'djradicale.rights',
-        'djradicale.storage',
         'djradicale.tests',
     ],
     'long_description': '',
@@ -38,8 +35,8 @@ data = {
         'Framework :: Django',
     ],
     'install_requires': [
-        'Django >= 2.0',
-        'Radicale == 1.1.1',
+        'Django >= 4.0.1',
+        'Radicale >= 3.1.2',
     ],
 }
 

@@ -1459,6 +1459,7 @@ END:VCALENDAR
     def test_everything(self):
         self.client.http_auth('user', 'password')
         # create
-        self.put(name='20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics')
-        self.get(name='20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics')
-        self.report(name='20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics')
+        name = '20160729T101032Z-9313-1000-4291-10_localhost-20160729T101116Z.ics'
+        self.put(name=name)
+        self.get(name=name)
+        self.report(name=name)

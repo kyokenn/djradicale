@@ -15,25 +15,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import include, path
 from django.contrib import admin
 
 from djradicale.views import DjRadicaleView, WellKnownView
-
 
 admin.autodiscover()
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^' + settings.DJRADICALE_CONFIG['server']['base_prefix'].lstrip('/'),
-        include(('djradicale.urls', 'djradicale'))),
-
-    # .well-known external implementation
-    url(r'^\.well-known/(?P<type>(caldav|carddav))$',
-        WellKnownView.as_view(), name='djradicale_well-known'),
-
-    # .well-known internal (radicale) implementation
-    # url(r'^\.well-known/(?P<type>(caldav|carddav))$',
-    #     DjRadicaleView.as_view(), name='djradicale_well-known'),
+    path('admin/', admin.site.urls),
+    path('' + settings.DJRADICALE_PREFIX.lstrip('/'),
+         include(('djradicale.urls', 'djradicale-caldav'))),
+    path('.well-known/caldav', WellKnownView.as_view(type='caldav'), name='well-known-caldav'),
+    path('.well-known/carddav', WellKnownView.as_view(type='carddav'), name='well-known-carddav'),
 ]

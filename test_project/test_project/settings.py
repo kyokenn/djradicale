@@ -117,42 +117,15 @@ LOGGING = {
     }
 }
 
+DJRADICALE_PREFIX = '/radicale/'
 DJRADICALE_CONFIG = {
-    'server': {
-        'base_prefix': '/pim/',
-        'realm': 'Radicale - Password Required',
-    },
-    'encoding': {
-        'request': 'utf-8',
-        'stock': 'utf-8',
-    },
     'auth': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.auth.django',
+        'type': 'djradicale.auth',
     },
     'rights': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.rights.django',
+        'type': 'djradicale.rights',
     },
     'storage': {
-        'type': 'custom',
-        'custom_handler': 'djradicale.storage.django',
-    },
-    'well-known': {
-        'carddav': '/pim/%(user)s/addressbook.vcf',
-        'caldav': '/pim/%(user)s/calendar.ics',
-    },
-}
-
-DJRADICALE_RIGHTS = {
-    'rw': {
-        'user': '.+',
-        'collection': '^%(login)s/[a-z0-9\.\-_]+\.(vcf|ics)$',
-        'permission': 'rw',
-    },
-    'rw-root': {
-        'user': '.+',
-        'collection': '^%(login)s$',
-        'permission': 'rw',
+        'type': 'djradicale.storage',
     },
 }
