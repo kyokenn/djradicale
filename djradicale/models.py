@@ -111,7 +111,9 @@ class DBItem(models.Model):
             collection=collection,
             collection_path=collection.path,
             href=self.name,
-            text=self.text)
+            text=self.text,
+            last_modified=self.timestamp.timestamp
+        )
 
     @property
     def fn(self):
