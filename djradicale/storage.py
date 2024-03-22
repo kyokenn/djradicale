@@ -58,10 +58,12 @@ class Collection(BaseCollection):
     def upload(self, href, item):
         try:
             dbcollection = DBCollection.objects.get(path=self.path)
-            dbitem = DBItem.objects.create(
+            dbitem, _ = DBItem.objects.get_or_create(
                 collection=dbcollection,
-                name=href,
-                text=item.serialize())
+                name=href
+            )
+            dbitem.text = item.serialize()
+            dbitem.save()
         except DBCollection.DoesNotExist:
             pass
         else:
