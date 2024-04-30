@@ -17,6 +17,7 @@
 from django.conf import settings
 
 from radicale.rights import BaseRights
+from radicale import pathutils
 
 
 class Rights(BaseRights):
@@ -31,19 +32,25 @@ class Rights(BaseRights):
         - W: write collections (excluding address books and calendars)
         - w: write address book and calendar collections
         """
-        print('---> authorization', user, path)
-
         # anonymous is forbidden
         if not user:
             return ''
 
-        # no access to root
-        if path == '/{}/'.format(user):
-            return ''
+        sane_path = pathutils.strip_path(path)
+
+        if not sane_path:
+            return "R"
+
+        if user != sane_path.split("/", maxsplit=1)[0]:
+            return ""
+        
+        # access to root
+        if "/" not in sane_path:
+            return 'RW'
 
         # read+write access to owned collections
-        if path.startswith('/{}/'.format(user)):
-            return 'RWrw'
+        if sane_path.count("/") == 1:
+            return 'rw'
 
         # anyone else is forbidden
-        return ''
+        return ""
